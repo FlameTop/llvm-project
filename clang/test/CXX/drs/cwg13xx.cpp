@@ -204,7 +204,7 @@ namespace cwg1330 { // cwg1330: 4 c++11
   //   since-cxx17-note@-2 {{use 'noexcept(false)' instead}}
   void (A::*af2)() throw() = &A::f;
   // cxx98-14-error@-1 {{target exception specification is not superset of source}}
-  // since-cxx17-error@-2 {{cannot initialize a variable of type 'void (cwg1330::A::*)() throw()' with an rvalue of type 'void (cwg1330::A::*)() throw(T)': different exception specifications}}
+  // since-cxx17-error@-2 {{cannot initialize a variable of type 'void (A::*)() throw()' with an rvalue of type 'void (cwg1330::A::*)() throw(T)': different exception specifications}}
 
 #if __cplusplus >= 201103L
   static_assert(noexcept(A().g()), "");
@@ -305,6 +305,18 @@ namespace cwg1330 { // cwg1330: 4 c++11
 }
 
 // cwg1334: sup 1719
+
+namespace cwg1340 { // cwg1340: 2.9
+struct A;
+struct B;
+
+void f(B* a, A B::* p) {
+  (*a).*p;
+  // expected-warning@-1 {{expression result unused}}
+  a->*p;
+  // expected-warning@-1 {{expression result unused}}
+}
+} // namespace cwg1340
 
 namespace cwg1341 { // cwg1341: sup P0683R1
 #if __cplusplus >= 202002L
@@ -450,6 +462,25 @@ struct D4 : NoexceptCtor, ThrowingDefaultArgTemplate {
 static_assert(!__is_nothrow_constructible(D4, int), "");
 #endif
 } // namespace cwg1350
+
+namespace cwg1352 { // cwg1352: 3.0
+struct A {
+#if __cplusplus >= 201103L
+  int a = sizeof(A);
+#endif
+  void f(int b = sizeof(A));
+};
+
+template <typename T>
+struct B {
+#if __cplusplus >= 201103L
+  int a = sizeof(B) + sizeof(T);
+#endif
+  void f(int b = sizeof(B) + sizeof(T));
+};
+
+template class B<int>;
+} // namespace cwg1352
 
 namespace cwg1358 { // cwg1358: 3.1
 #if __cplusplus >= 201103L
